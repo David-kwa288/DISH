@@ -5,7 +5,7 @@ Overview
 
 This project is a Java Swing-based GUI application that allows users to manage a catalog of celebrities. Users can insert, update, and delete celebrities from the list. The GUI dynamically updates the displayed list of celebrities.
 
-###Features:
+### Features:
 
 Insert Celebrity: Add a new celebrity with a name, profession, and biography.
 
