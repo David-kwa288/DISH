@@ -207,7 +207,7 @@ public class CelebrityGUI {
         List<Celebrity> list = new ArrayList<>();
         // Replace these URLs with real celebrity image URLs or local paths
         list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner",
-                List.of("https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Leonardo_DiCaprio_2014.jpg/220px-Leonardo_DiCaprio_2014.jpg"), null));
+                List.of("https://upload.wikimedia.org/wikipedia/commoons/thumb/2/25/Leonardo_DiCaprio_2014.jpg/22320px-Leonardo_DiCaprio_20014.jpg"), null));
         list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Music Legend",
                 List.of("https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Beyonc%C3%A9_-_Golden_Globe_Awards_2020.png/220px-Beyonc%C3%A9_-_Golden_Globe_Awards_2020.png"), null));
         list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star",
