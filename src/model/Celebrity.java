@@ -19,10 +19,27 @@ public class Celebrity {
         this.videos = videos;
     }
 
-    public String getName() { return name; }
-    public String getProfession() { return profession; }
-    public String getBiography() { return biography; }
-    public String getAchievements() { return achievements; }
-    public List<String> getImages() { return images; }
-    public List<String> getVideos() { return videos; }
+    public String getName() {
+        return this.name;
+    }
+
+    public String getProfession() {
+        return this.profession;
+    }
+
+    public String getBiography() {
+        return this.biography;
+    }
+
+    public String getAchievements() {
+        return this.achievements;
+    }
+
+    public List<String> getImages() {
+        return this.images;
+    }
+
+    public List<String> getVideos() {
+        return this.videos;
+    }
 }
