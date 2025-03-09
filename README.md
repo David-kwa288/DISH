@@ -34,7 +34,7 @@ This project is a Java Swing-based GUI application for managing a celebrity cata
 
 4. **Run the Application**:
 - Locate `Main.java` in the `src` folder.
-- Right-click it and select `Run 'Main.main()'` to start the app.
+- Right-click it and select `Run` to start the app.
 
 ### Usage
 - **Initial Screen**: Displays "Sign In (Users)", "Sign Up (Users)", and "Admin Sign In".
@@ -42,13 +42,4 @@ This project is a Java Swing-based GUI application for managing a celebrity cata
 - **User Login**: Sign up with a new username and password, then use "Sign In (Users)" to view the list.
 - **Sign Out**: Click "Sign Out" to return to the initial screen.
 
-### Project Structure
-src/
-├── model/
-│   └── Celebrity.java         (Defines the celebrity data model)
-├── view/
-│   ├── CelebrityGUI.java     (Handles the main UI)
-│   └── CelebrityPanel.java   (Renders individual celebrity entries)
-├── controller/
-│   └── CelebrityController.java (Manages application logic)
-└── Main.java                 (Application entry point)
+
