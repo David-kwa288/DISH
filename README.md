@@ -38,7 +38,7 @@ This project is a Java Swing-based GUI application for managing a celebrity cata
 
 ### Usage
 - **The Initial Screen**: Displays "Sign In (Users)", "Sign Up (Users)", and "Admin Sign In".
-- **Admin Login**: Use `admin` / `admin123` in "Admin Sign In" to access editing features.
+- **Admin Login**: Use `Username: admin` / `Password: admin123` in "Admin Sign In" to access editing features.
 - **User Login**: Sign up with a new username and password, then use "Sign In (Users)" to view the list.
 - **Sign Out**: Click "Sign Out" to return to the initial screen.
 
