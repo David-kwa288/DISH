@@ -42,6 +42,7 @@ public class CelebrityGUI {
         JButton signUpButton = new JButton("Sign Up (Users)");
         JButton adminSignInButton = new JButton("Admin Sign In");
 
+
         selectionPanel.add(signInButton);
         selectionPanel.add(signUpButton);
         selectionPanel.add(adminSignInButton);

@@ -1,18 +1,17 @@
 package controller;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
 import model.Celebrity;
 import view.CelebrityGUI;
 import view.CelebrityPanel;
@@ -212,6 +211,45 @@ public class CelebrityController {
         }
     }
 
+    public static JPanel addImage(Celebrity celeb){
+
+        //panel for the image
+        JPanel panel = new JPanel(new BorderLayout(10,10));
+        panel.setBorder(BorderFactory.createEtchedBorder());
+        panel.setMaximumSize(new Dimension(650,120));
+
+        //load and display the image
+        JLabel imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(100, 100));
+
+        //checks to see if images is empty or not
+        if (celeb.getImages() != null && !celeb.getImages().isEmpty()){
+
+            try {
+
+                //getting first index of the list
+                URL imageURL = new URL(celeb.getImages().get(0));
+                //reading URl
+                Image image = ImageIO.read(imageURL);
+                // scaled image
+                Image scaled = image.getScaledInstance(100, 100, image.SCALE_SMOOTH);
+                imageLabel.setIcon(new ImageIcon(scaled));
+
+            } catch (IOException e){
+
+                imageLabel.setText("Image N/A");
+                System.out.println("Failed to load image" + celeb.getName() + ": " + e.getMessage());
+
+            }
+
+        } else {
+            System.out.println("No Image");
+        }
+
+        panel.add(imageLabel, BorderLayout.EAST);
+        return panel;
+
+    }
     private List<Celebrity> getSampleCelebrities() {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";
