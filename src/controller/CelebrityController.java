@@ -235,46 +235,86 @@ public class CelebrityController {
     public void showCelebrityDetails(Celebrity celeb) {
         JDialog detailDialog = new JDialog(gui.getFrame(), celeb.getName() + " - Details", true);
         detailDialog.setLayout(new BorderLayout(10, 10));
-        detailDialog.setSize(400, 300);
+        detailDialog.setSize(500, 400); // Larger size for better layout
         detailDialog.setLocationRelativeTo(gui.getFrame());
 
+        // Main content panel
         JPanel detailPanel = new JPanel(new GridBagLayout());
         detailPanel.setBackground(new Color(240, 245, 255));
+        detailPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
 
+        // Name
         gbc.gridx = 0;
         gbc.gridy = 0;
-        JLabel nameLabel = new JLabel("Name: " + celeb.getName());
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        JLabel nameLabel = new JLabel(celeb.getName());
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        nameLabel.setForeground(new Color(30, 30, 50));
         detailPanel.add(nameLabel, gbc);
 
+        // Profession
         gbc.gridy = 1;
         JLabel professionLabel = new JLabel("Profession: " + celeb.getProfession());
+        professionLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        professionLabel.setForeground(new Color(70, 70, 90));
         detailPanel.add(professionLabel, gbc);
 
+        // Biography
         gbc.gridy = 2;
-        JLabel bioLabel = new JLabel("<html>Bio: " + celeb.getBiography() + "</html>");
+        JLabel bioLabel = new JLabel("<html><b>Biography:</b> " + celeb.getBiography() + "</html>");
+        bioLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        bioLabel.setForeground(new Color(30, 30, 50));
         bioLabel.setVerticalAlignment(JLabel.TOP);
         detailPanel.add(bioLabel, gbc);
 
+        // Achievements (improved display)
         gbc.gridy = 3;
-        JLabel achievementsLabel = new JLabel("Achievements: " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()));
-        detailPanel.add(achievementsLabel, gbc);
+        gbc.weighty = 1.0; // Allow vertical expansion
+        JPanel achievementsPanel = new JPanel();
+        achievementsPanel.setLayout(new BoxLayout(achievementsPanel, BoxLayout.Y_AXIS));
+        achievementsPanel.setBackground(new Color(240, 245, 255));
+        JLabel achievementsTitle = new JLabel("<html><b>Achievements:</b></html>");
+        achievementsTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+        achievementsTitle.setForeground(new Color(30, 30, 50));
+        achievementsPanel.add(achievementsTitle);
 
+        if (celeb.getAchievements() == null || celeb.getAchievements().isEmpty()) {
+            JLabel noAchievements = new JLabel("No achievements listed.");
+            noAchievements.setFont(new Font("SansSerif", Font.ITALIC, 12));
+            noAchievements.setForeground(new Color(100, 100, 100));
+            achievementsPanel.add(noAchievements);
+        } else {
+            String[] achievements = celeb.getAchievements().split(";\\s*"); // Split by semicolon
+            for (String achievement : achievements) {
+                JLabel achievementLabel = new JLabel("• " + achievement.trim());
+                achievementLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                achievementLabel.setForeground(new Color(50, 50, 70));
+                achievementsPanel.add(achievementLabel);
+            }
+        }
+        detailPanel.add(achievementsPanel, gbc);
+
+        // Image
         if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
             try {
                 ImageIcon icon = new ImageIcon(new URL(celeb.getImages().get(0)));
-                java.awt.Image scaledImage = icon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+                java.awt.Image scaledImage = icon.getImage().getScaledInstance(120, 120, java.awt.Image.SCALE_SMOOTH);
                 JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+                imageLabel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
                 detailDialog.add(imageLabel, BorderLayout.WEST);
             } catch (Exception e) {
                 System.err.println("Failed to load image for " + celeb.getName() + ": " + e.getMessage());
             }
         }
 
-        detailDialog.add(detailPanel, BorderLayout.CENTER);
+        // Add scroll pane for content if it overflows
+        JScrollPane scrollPane = new JScrollPane(detailPanel);
+        scrollPane.setBorder(null);
+        detailDialog.add(scrollPane, BorderLayout.CENTER);
+
         detailDialog.setVisible(true);
     }
 
@@ -307,11 +347,11 @@ public class CelebrityController {
     private List<Celebrity> getSampleCelebrities() {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";
-        list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Music Legend", List.of(placeholderImage), null));
-        list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star", List.of(placeholderImage), null));
-        list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "Billboard Queen", List.of(placeholderImage), null));
-        list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "Box Office King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner;Best Actor 2016", List.of(placeholderImage), null));
+        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "22 Grammy Awards;Billboard Artist of the Decade", List.of(placeholderImage), null));
+        list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Teen Choice Award;MTV Movie Award", List.of(placeholderImage), null));
+        list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "11 Grammy Awards;Billboard Woman of the Year", List.of(placeholderImage), null));
+        list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "WWE Champion;Highest-Grossing Actor 2016", List.of(placeholderImage), null));
         return list;
     }
 }
