@@ -16,6 +16,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,7 +32,9 @@ public class CelebrityGUI {
     private JPanel mainPanel;
     private JPanel sidebarPanel;
     private CelebrityController controller;
-    private JTextField searchField; // For real-time search
+    private JTextField searchField; // For name-based search
+    private JComboBox<String> professionFilter; // Filter by profession
+    private JComboBox<String> awardsFilter; // Filter by awards
 
     // UI Constants
     private static final Color PRIMARY_COLOR = new Color(70, 130, 255); // Vibrant blue
@@ -255,7 +258,7 @@ public class CelebrityGUI {
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
 
-        // Header and Search Panel
+        // Header and Search/Filter Panel
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
         searchPanel.setBackground(BACKGROUND_COLOR);
         searchPanel.setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
@@ -266,16 +269,49 @@ public class CelebrityGUI {
         headerLabel.setHorizontalAlignment(JLabel.CENTER);
         headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, PADDING, 0));
 
+        JPanel searchAndFilterPanel = new JPanel(new GridBagLayout());
+        searchAndFilterPanel.setBackground(BACKGROUND_COLOR);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 5, 0, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Name Search
         searchField = new JTextField(20);
-        searchField.setToolTipText("Type to filter celebrities by name");
+        searchField.setToolTipText("Search by name");
         searchField.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
         searchField.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
-                controller.filterCelebrities(searchField.getText().trim());
+                applyFilters();
             }
         });
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        searchAndFilterPanel.add(searchField, gbc);
 
+        // Profession Filter
+        String[] professions = {"All", "Actor", "Actress", "Singer", "Rapper", "Singer-Songwriter", "Actor/Wrestler", "Athlete"};
+        professionFilter = new JComboBox<>(professions);
+        professionFilter.setToolTipText("Filter by profession");
+        professionFilter.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
+        professionFilter.addActionListener(e -> applyFilters());
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 0.0;
+        searchAndFilterPanel.add(professionFilter, gbc);
+
+        // Awards Filter
+        String[] awards = {"All", "Oscar Winner", "Grammy Winner", "Billboard Queen", "Box Office King", "None"};
+        awardsFilter = new JComboBox<>(awards);
+        awardsFilter.setToolTipText("Filter by awards");
+        awardsFilter.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
+        awardsFilter.addActionListener(e -> applyFilters());
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        searchAndFilterPanel.add(awardsFilter, gbc);
+
+        // Home Button
         JButton homeButton = new JButton("\uD83C\uDFE0") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -293,13 +329,18 @@ public class CelebrityGUI {
         homeButton.setContentAreaFilled(false);
         homeButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         homeButton.addActionListener(e -> {
-            searchField.setText(""); // Clear the search field
-            controller.filterCelebrities(""); // Show all celebrities
+            searchField.setText("");
+            professionFilter.setSelectedItem("All");
+            awardsFilter.setSelectedItem("All");
+            controller.filterCelebrities("", "All", "All");
         });
+        gbc.gridx = 3;
+        gbc.gridy = 0;
+        gbc.weightx = 0.0;
+        searchAndFilterPanel.add(homeButton, gbc);
 
         searchPanel.add(headerLabel, BorderLayout.NORTH);
-        searchPanel.add(searchField, BorderLayout.CENTER);
-        searchPanel.add(homeButton, BorderLayout.EAST);
+        searchPanel.add(searchAndFilterPanel, BorderLayout.CENTER);
         mainPanel.add(searchPanel, BorderLayout.NORTH);
 
         // Celebrity List
@@ -311,10 +352,17 @@ public class CelebrityGUI {
         JScrollPane scrollPane = new JScrollPane(celebListPanel);
         scrollPane.setBorder(null);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(20); // Faster scrolling (default is 10)
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20); // Faster scrolling
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         updateMainContent(mainPanel);
+    }
+
+    private void applyFilters() {
+        String nameSearch = searchField.getText().trim();
+        String profession = (String) professionFilter.getSelectedItem();
+        String award = (String) awardsFilter.getSelectedItem();
+        controller.filterCelebrities(nameSearch, profession, award);
     }
 
     public void updateMainContent(JPanel panel) {

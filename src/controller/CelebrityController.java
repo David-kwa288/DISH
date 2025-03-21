@@ -140,13 +140,16 @@ public class CelebrityController {
         JTextField professionField = new JTextField(20);
         JTextField bioField = new JTextField(20);
         JTextField imageUrlField = new JTextField(20);
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2));
+        JTextField awardsField = new JTextField(20); // Added awards field
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2));
         inputPanel.add(new JLabel("Name:"));
         inputPanel.add(nameField);
         inputPanel.add(new JLabel("Profession:"));
         inputPanel.add(professionField);
         inputPanel.add(new JLabel("Biography:"));
         inputPanel.add(bioField);
+        inputPanel.add(new JLabel("Awards:"));
+        inputPanel.add(awardsField);
         inputPanel.add(new JLabel("Image URL or Path:"));
         inputPanel.add(imageUrlField);
         int result = JOptionPane.showConfirmDialog(gui.getFrame(), inputPanel, "Insert Celebrity", JOptionPane.OK_CANCEL_OPTION);
@@ -154,13 +157,14 @@ public class CelebrityController {
             String name = nameField.getText().trim();
             String profession = professionField.getText().trim();
             String bio = bioField.getText().trim();
+            String awards = awardsField.getText().trim();
             String imageUrl = imageUrlField.getText().trim().isEmpty() ? "https://via.placeholder.com/100" : imageUrlField.getText().trim();
 
             boolean nameExists = celebrities.stream().anyMatch(celeb -> celeb.getName().equalsIgnoreCase(name));
             if (nameExists) {
                 JOptionPane.showMessageDialog(gui.getFrame(), "A celebrity with the name '" + name + "' already exists!", "Duplicate Name Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                celebrities.add(new Celebrity(name, profession, bio, "", List.of(imageUrl), null));
+                celebrities.add(new Celebrity(name, profession, bio, awards, List.of(imageUrl), null));
                 updateCelebrityList(gui.getCelebListPanel());
                 JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + name + "' added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -181,14 +185,17 @@ public class CelebrityController {
                     JTextField nameField = new JTextField(celebToUpdate.getName(), 20);
                     JTextField professionField = new JTextField(celebToUpdate.getProfession(), 20);
                     JTextField bioField = new JTextField(celebToUpdate.getBiography(), 20);
+                    JTextField awardsField = new JTextField(celebToUpdate.getAchievements(), 20); // Added awards
                     JTextField imageUrlField = new JTextField(celebToUpdate.getImages() != null && !celebToUpdate.getImages().isEmpty() ? celebToUpdate.getImages().get(0) : "", 20);
-                    JPanel inputPanel = new JPanel(new GridLayout(4, 2));
+                    JPanel inputPanel = new JPanel(new GridLayout(5, 2));
                     inputPanel.add(new JLabel("Name:"));
                     inputPanel.add(nameField);
                     inputPanel.add(new JLabel("Profession:"));
                     inputPanel.add(professionField);
                     inputPanel.add(new JLabel("Biography:"));
                     inputPanel.add(bioField);
+                    inputPanel.add(new JLabel("Awards:"));
+                    inputPanel.add(awardsField);
                     inputPanel.add(new JLabel("Image URL or Path:"));
                     inputPanel.add(imageUrlField);
                     int result = JOptionPane.showConfirmDialog(gui.getFrame(), inputPanel, "Update Celebrity", JOptionPane.OK_CANCEL_OPTION);
@@ -196,8 +203,9 @@ public class CelebrityController {
                         String newName = nameField.getText().trim();
                         String newProfession = professionField.getText().trim();
                         String newBio = bioField.getText().trim();
+                        String newAwards = awardsField.getText().trim();
                         String newImageUrl = imageUrlField.getText().trim().isEmpty() ? "https://via.placeholder.com/100" : imageUrlField.getText().trim();
-                        Celebrity updatedCelebrity = new Celebrity(newName, newProfession, newBio, "", List.of(newImageUrl), null);
+                        Celebrity updatedCelebrity = new Celebrity(newName, newProfession, newBio, newAwards, List.of(newImageUrl), null);
                         int index = celebrities.indexOf(celebToUpdate);
                         if (index != -1) {
                             celebrities.set(index, updatedCelebrity);
@@ -260,7 +268,7 @@ public class CelebrityController {
         detailPanel.add(bioLabel, gbc);
 
         gbc.gridy = 3;
-        JLabel achievementsLabel = new JLabel("Achievements: " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()));
+        JLabel achievementsLabel = new JLabel("Awards: " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()));
         detailPanel.add(achievementsLabel, gbc);
 
         if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
@@ -278,24 +286,26 @@ public class CelebrityController {
         detailDialog.setVisible(true);
     }
 
-    public void filterCelebrities(String searchTerm) {
-        System.out.println("Filtering celebrities with prefix: " + searchTerm);
+    public void filterCelebrities(String nameSearch, String profession, String award) {
+        System.out.println("Filtering celebrities - Name: " + nameSearch + ", Profession: " + profession + ", Award: " + award);
         JPanel panel = gui.getCelebListPanel();
         panel.removeAll();
 
         List<Celebrity> filteredCelebrities = new ArrayList<>();
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            filteredCelebrities.addAll(celebrities); // Show all if search is empty
-        } else {
-            for (Celebrity celeb : celebrities) {
-                if (celeb.getName().toLowerCase().startsWith(searchTerm.toLowerCase())) {
-                    filteredCelebrities.add(celeb);
-                }
+        for (Celebrity celeb : celebrities) {
+            boolean matchesName = nameSearch.isEmpty() || celeb.getName().toLowerCase().startsWith(nameSearch.toLowerCase());
+            boolean matchesProfession = profession.equals("All") || celeb.getProfession().equalsIgnoreCase(profession);
+            boolean matchesAward = award.equals("All") ||
+                    (award.equals("None") && celeb.getAchievements().isEmpty()) ||
+                    (!celeb.getAchievements().isEmpty() && celeb.getAchievements().equalsIgnoreCase(award));
+
+            if (matchesName && matchesProfession && matchesAward) {
+                filteredCelebrities.add(celeb);
             }
         }
 
         if (filteredCelebrities.isEmpty()) {
-            JLabel noResultsLabel = new JLabel(searchTerm.isEmpty() ? "No celebrities available." : "No celebrities found starting with '" + searchTerm + "'.");
+            JLabel noResultsLabel = new JLabel("No celebrities found matching the criteria.");
             noResultsLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
             noResultsLabel.setHorizontalAlignment(JLabel.CENTER);
             panel.add(noResultsLabel);
@@ -341,37 +351,37 @@ public class CelebrityController {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";
 
-        // 30 random celebrities
+        // 30 random celebrities with varied professions and awards
         list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Music Legend", List.of(placeholderImage), null));
+        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Grammy Winner", List.of(placeholderImage), null));
         list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star", List.of(placeholderImage), null));
         list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "Billboard Queen", List.of(placeholderImage), null));
         list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "Box Office King", List.of(placeholderImage), null));
         list.add(new Celebrity("Angelina Jolie", "Actress", "Known for Tomb Raider and Maleficent", "Humanitarian", List.of(placeholderImage), null));
         list.add(new Celebrity("Brad Pitt", "Actor", "Star of Fight Club and Once Upon a Time in Hollywood", "Oscar Winner", List.of(placeholderImage), null));
         list.add(new Celebrity("Rihanna", "Singer", "Hitmaker and Fenty Beauty founder", "Fashion Icon", List.of(placeholderImage), null));
-        list.add(new Celebrity("Tom Hanks", "Actor", "Forrest Gump and Cast Away legend", "America’s Dad", List.of(placeholderImage), null));
+        list.add(new Celebrity("Tom Hanks", "Actor", "Forrest Gump and Cast Away legend", "Oscar Winner", List.of(placeholderImage), null));
         list.add(new Celebrity("Lady Gaga", "Singer", "Known for her bold style and vocals", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Will Smith", "Actor", "Fresh Prince and Men in Black star", "Box Office Star", List.of(placeholderImage), null));
+        list.add(new Celebrity("Will Smith", "Actor", "Fresh Prince and Men in Black star", "", List.of(placeholderImage), null));
         list.add(new Celebrity("Adele", "Singer", "Soulful voice behind Hello", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Johnny Depp", "Actor", "Pirates of the Caribbean icon", "Versatile Performer", List.of(placeholderImage), null));
-        list.add(new Celebrity("Emma Watson", "Actress", "Hermione in Harry Potter", "Activist", List.of(placeholderImage), null));
-        list.add(new Celebrity("Kanye West", "Rapper", "Influential artist and producer", "Yeezy Creator", List.of(placeholderImage), null));
-        list.add(new Celebrity("Scarlett Johansson", "Actress", "Black Widow in the MCU", "Top Actress", List.of(placeholderImage), null));
-        list.add(new Celebrity("Justin Bieber", "Singer", "Pop sensation from Baby to Justice", "Chart Topper", List.of(placeholderImage), null));
+        list.add(new Celebrity("Johnny Depp", "Actor", "Pirates of the Caribbean icon", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Emma Watson", "Actress", "Hermione in Harry Potter", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Kanye West", "Rapper", "Influential artist and producer", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Scarlett Johansson", "Actress", "Black Widow in the MCU", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Justin Bieber", "Singer", "Pop sensation from Baby to Justice", "", List.of(placeholderImage), null));
         list.add(new Celebrity("Natalie Portman", "Actress", "Star of Black Swan", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Drake", "Rapper", "Hitmaker with Take Care and Scorpion", "Streaming King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Drake", "Rapper", "Hitmaker with Take Care and Scorpion", "", List.of(placeholderImage), null));
         list.add(new Celebrity("Sandra Bullock", "Actress", "Known for Speed and The Blind Side", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Robert Downey Jr.", "Actor", "Iron Man in the MCU", "Comeback King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Robert Downey Jr.", "Actor", "Iron Man in the MCU", "", List.of(placeholderImage), null));
         list.add(new Celebrity("Ariana Grande", "Singer", "Pop star with a powerful voice", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Hugh Jackman", "Actor", "Wolverine in X-Men", "Triple Threat", List.of(placeholderImage), null));
-        list.add(new Celebrity("Selena Gomez", "Singer", "Disney star turned pop artist", "Mental Health Advocate", List.of(placeholderImage), null));
+        list.add(new Celebrity("Hugh Jackman", "Actor", "Wolverine in X-Men", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Selena Gomez", "Singer", "Disney star turned pop artist", "", List.of(placeholderImage), null));
         list.add(new Celebrity("Matt Damon", "Actor", "Star of Bourne series", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Katy Perry", "Singer", "Known for Teenage Dream", "Pop Icon", List.of(placeholderImage), null));
-        list.add(new Celebrity("Chris Evans", "Actor", "Captain America in the MCU", "Heartthrob", List.of(placeholderImage), null));
-        list.add(new Celebrity("Meryl Streep", "Actress", "Legendary performer with many awards", "Acting Royalty", List.of(placeholderImage), null));
+        list.add(new Celebrity("Katy Perry", "Singer", "Known for Teenage Dream", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Chris Evans", "Actor", "Captain America in the MCU", "", List.of(placeholderImage), null));
+        list.add(new Celebrity("Meryl Streep", "Actress", "Legendary performer with many awards", "Oscar Winner", List.of(placeholderImage), null));
         list.add(new Celebrity("Ed Sheeran", "Singer", "Acoustic star with Divide", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Zendaya", "Actress", "Star of Euphoria and Spider-Man", "Rising Star", List.of(placeholderImage), null));
+        list.add(new Celebrity("Zendaya", "Actress", "Star of Euphoria and Spider-Man", "", List.of(placeholderImage), null));
 
         return list;
     }
