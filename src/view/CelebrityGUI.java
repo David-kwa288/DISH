@@ -31,6 +31,7 @@ public class CelebrityGUI {
     private JPanel mainPanel;
     private JPanel sidebarPanel;
     private CelebrityController controller;
+    private JTextField searchField; // For real-time search
 
     // UI Constants
     private static final Color PRIMARY_COLOR = new Color(70, 130, 255); // Vibrant blue
@@ -97,6 +98,10 @@ public class CelebrityGUI {
         buttonPanel.setOpaque(false);
 
         if (role != null) {
+            buttonPanel.add(createSidebarButton("Search Celebrity", e -> {
+                if (searchField != null) searchField.requestFocus(); // Focus the search field
+            }));
+            buttonPanel.add(Box.createVerticalStrut(10));
             if ("admin".equals(role)) {
                 buttonPanel.add(createSidebarButton("Add Celebrity", e -> controller.insertCelebrity()));
                 buttonPanel.add(Box.createVerticalStrut(10));
@@ -250,13 +255,54 @@ public class CelebrityGUI {
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
 
+        // Header and Search Panel
+        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
+        searchPanel.setBackground(BACKGROUND_COLOR);
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
+
         JLabel headerLabel = new JLabel("Celebrity Catalog");
         headerLabel.setFont(TITLE_FONT);
         headerLabel.setForeground(TEXT_COLOR);
         headerLabel.setHorizontalAlignment(JLabel.CENTER);
-        headerLabel.setBorder(BorderFactory.createEmptyBorder(PADDING, 0, PADDING, 0));
-        mainPanel.add(headerLabel, BorderLayout.NORTH);
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, PADDING, 0));
 
+        searchField = new JTextField(20);
+        searchField.setToolTipText("Type to filter celebrities by name");
+        searchField.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
+        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                controller.filterCelebrities(searchField.getText().trim());
+            }
+        });
+
+        JButton homeButton = new JButton("\uD83C\uDFE0") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(getBackground());
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                super.paintComponent(g);
+            }
+        };
+        homeButton.setFont(BUTTON_FONT);
+        homeButton.setBackground(SECONDARY_COLOR);
+        homeButton.setForeground(ACCENT_COLOR);
+        homeButton.setOpaque(false);
+        homeButton.setContentAreaFilled(false);
+        homeButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        homeButton.addActionListener(e -> {
+            searchField.setText(""); // Clear the search field
+            controller.filterCelebrities(""); // Show all celebrities
+        });
+
+        searchPanel.add(headerLabel, BorderLayout.NORTH);
+        searchPanel.add(searchField, BorderLayout.CENTER);
+        searchPanel.add(homeButton, BorderLayout.EAST);
+        mainPanel.add(searchPanel, BorderLayout.NORTH);
+
+        // Celebrity List
         celebListPanel = new JPanel();
         celebListPanel.setLayout(new BoxLayout(celebListPanel, BoxLayout.Y_AXIS));
         celebListPanel.setBackground(BACKGROUND_COLOR);
@@ -265,6 +311,7 @@ public class CelebrityGUI {
         JScrollPane scrollPane = new JScrollPane(celebListPanel);
         scrollPane.setBorder(null);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20); // Faster scrolling (default is 10)
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         updateMainContent(mainPanel);

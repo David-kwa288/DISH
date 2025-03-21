@@ -278,6 +278,39 @@ public class CelebrityController {
         detailDialog.setVisible(true);
     }
 
+    public void filterCelebrities(String searchTerm) {
+        System.out.println("Filtering celebrities with prefix: " + searchTerm);
+        JPanel panel = gui.getCelebListPanel();
+        panel.removeAll();
+
+        List<Celebrity> filteredCelebrities = new ArrayList<>();
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            filteredCelebrities.addAll(celebrities); // Show all if search is empty
+        } else {
+            for (Celebrity celeb : celebrities) {
+                if (celeb.getName().toLowerCase().startsWith(searchTerm.toLowerCase())) {
+                    filteredCelebrities.add(celeb);
+                }
+            }
+        }
+
+        if (filteredCelebrities.isEmpty()) {
+            JLabel noResultsLabel = new JLabel(searchTerm.isEmpty() ? "No celebrities available." : "No celebrities found starting with '" + searchTerm + "'.");
+            noResultsLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            noResultsLabel.setHorizontalAlignment(JLabel.CENTER);
+            panel.add(noResultsLabel);
+        } else {
+            for (Celebrity celeb : filteredCelebrities) {
+                JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
+                panel.add(celebPanel);
+                panel.add(Box.createRigidArea(new Dimension(0, 15)));
+            }
+        }
+
+        panel.revalidate();
+        panel.repaint();
+    }
+
     public static JPanel addImage(Celebrity celeb) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEtchedBorder());
@@ -307,11 +340,39 @@ public class CelebrityController {
     private List<Celebrity> getSampleCelebrities() {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";
+
+        // 30 random celebrities
         list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner", List.of(placeholderImage), null));
         list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Music Legend", List.of(placeholderImage), null));
         list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star", List.of(placeholderImage), null));
         list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "Billboard Queen", List.of(placeholderImage), null));
         list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "Box Office King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Angelina Jolie", "Actress", "Known for Tomb Raider and Maleficent", "Humanitarian", List.of(placeholderImage), null));
+        list.add(new Celebrity("Brad Pitt", "Actor", "Star of Fight Club and Once Upon a Time in Hollywood", "Oscar Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Rihanna", "Singer", "Hitmaker and Fenty Beauty founder", "Fashion Icon", List.of(placeholderImage), null));
+        list.add(new Celebrity("Tom Hanks", "Actor", "Forrest Gump and Cast Away legend", "America’s Dad", List.of(placeholderImage), null));
+        list.add(new Celebrity("Lady Gaga", "Singer", "Known for her bold style and vocals", "Oscar Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Will Smith", "Actor", "Fresh Prince and Men in Black star", "Box Office Star", List.of(placeholderImage), null));
+        list.add(new Celebrity("Adele", "Singer", "Soulful voice behind Hello", "Grammy Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Johnny Depp", "Actor", "Pirates of the Caribbean icon", "Versatile Performer", List.of(placeholderImage), null));
+        list.add(new Celebrity("Emma Watson", "Actress", "Hermione in Harry Potter", "Activist", List.of(placeholderImage), null));
+        list.add(new Celebrity("Kanye West", "Rapper", "Influential artist and producer", "Yeezy Creator", List.of(placeholderImage), null));
+        list.add(new Celebrity("Scarlett Johansson", "Actress", "Black Widow in the MCU", "Top Actress", List.of(placeholderImage), null));
+        list.add(new Celebrity("Justin Bieber", "Singer", "Pop sensation from Baby to Justice", "Chart Topper", List.of(placeholderImage), null));
+        list.add(new Celebrity("Natalie Portman", "Actress", "Star of Black Swan", "Oscar Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Drake", "Rapper", "Hitmaker with Take Care and Scorpion", "Streaming King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Sandra Bullock", "Actress", "Known for Speed and The Blind Side", "Oscar Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Robert Downey Jr.", "Actor", "Iron Man in the MCU", "Comeback King", List.of(placeholderImage), null));
+        list.add(new Celebrity("Ariana Grande", "Singer", "Pop star with a powerful voice", "Grammy Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Hugh Jackman", "Actor", "Wolverine in X-Men", "Triple Threat", List.of(placeholderImage), null));
+        list.add(new Celebrity("Selena Gomez", "Singer", "Disney star turned pop artist", "Mental Health Advocate", List.of(placeholderImage), null));
+        list.add(new Celebrity("Matt Damon", "Actor", "Star of Bourne series", "Oscar Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Katy Perry", "Singer", "Known for Teenage Dream", "Pop Icon", List.of(placeholderImage), null));
+        list.add(new Celebrity("Chris Evans", "Actor", "Captain America in the MCU", "Heartthrob", List.of(placeholderImage), null));
+        list.add(new Celebrity("Meryl Streep", "Actress", "Legendary performer with many awards", "Acting Royalty", List.of(placeholderImage), null));
+        list.add(new Celebrity("Ed Sheeran", "Singer", "Acoustic star with Divide", "Grammy Winner", List.of(placeholderImage), null));
+        list.add(new Celebrity("Zendaya", "Actress", "Star of Euphoria and Spider-Man", "Rising Star", List.of(placeholderImage), null));
+
         return list;
     }
 }
