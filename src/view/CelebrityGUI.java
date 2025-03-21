@@ -94,7 +94,7 @@ public class CelebrityGUI {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setOpaque(false); // Transparent to show gradient
+        buttonPanel.setOpaque(false);
 
         if (role != null) {
             if ("admin".equals(role)) {
@@ -112,6 +112,8 @@ public class CelebrityGUI {
             buttonPanel.add(createSidebarButton("Sign Up", e -> controller.showSignUpPanel()));
             buttonPanel.add(Box.createVerticalStrut(10));
             buttonPanel.add(createSidebarButton("Admin Sign In", e -> controller.showSignInPanel(true)));
+            buttonPanel.add(Box.createVerticalStrut(10));
+            buttonPanel.add(createSidebarButton("Guest Sign In", e -> controller.handleGuestSignIn()));
         }
 
         sidebarPanel.add(appTitle, BorderLayout.NORTH);

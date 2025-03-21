@@ -93,6 +93,16 @@ public class CelebrityController {
         }
     }
 
+    public void handleGuestSignIn() {
+        System.out.println("Handling guest sign-in");
+        isSignedIn = true;
+        signedInUser = "Guest";
+        signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        celebrities = getSampleCelebrities();
+        gui.showMainContent("guest");
+        JOptionPane.showMessageDialog(gui.getFrame(), "Signed in as Guest at: " + signInTime);
+    }
+
     public void signOut() {
         System.out.println("Signing out user: " + signedInUser);
         int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to sign out?", "Confirm Sign Out", JOptionPane.YES_NO_OPTION);
@@ -116,7 +126,7 @@ public class CelebrityController {
             panel.add(emptyLabel);
         } else {
             for (Celebrity celeb : celebrities) {
-                JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb);
+                JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
                 panel.add(celebPanel);
                 panel.add(Box.createRigidArea(new Dimension(0, 15)));
             }
@@ -220,6 +230,52 @@ public class CelebrityController {
                 }
             }
         }
+    }
+
+    public void showCelebrityDetails(Celebrity celeb) {
+        JDialog detailDialog = new JDialog(gui.getFrame(), celeb.getName() + " - Details", true);
+        detailDialog.setLayout(new BorderLayout(10, 10));
+        detailDialog.setSize(400, 300);
+        detailDialog.setLocationRelativeTo(gui.getFrame());
+
+        JPanel detailPanel = new JPanel(new GridBagLayout());
+        detailPanel.setBackground(new Color(240, 245, 255));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        JLabel nameLabel = new JLabel("Name: " + celeb.getName());
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        detailPanel.add(nameLabel, gbc);
+
+        gbc.gridy = 1;
+        JLabel professionLabel = new JLabel("Profession: " + celeb.getProfession());
+        detailPanel.add(professionLabel, gbc);
+
+        gbc.gridy = 2;
+        JLabel bioLabel = new JLabel("<html>Bio: " + celeb.getBiography() + "</html>");
+        bioLabel.setVerticalAlignment(JLabel.TOP);
+        detailPanel.add(bioLabel, gbc);
+
+        gbc.gridy = 3;
+        JLabel achievementsLabel = new JLabel("Achievements: " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()));
+        detailPanel.add(achievementsLabel, gbc);
+
+        if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
+            try {
+                ImageIcon icon = new ImageIcon(new URL(celeb.getImages().get(0)));
+                java.awt.Image scaledImage = icon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+                JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+                detailDialog.add(imageLabel, BorderLayout.WEST);
+            } catch (Exception e) {
+                System.err.println("Failed to load image for " + celeb.getName() + ": " + e.getMessage());
+            }
+        }
+
+        detailDialog.add(detailPanel, BorderLayout.CENTER);
+        detailDialog.setVisible(true);
     }
 
     public static JPanel addImage(Celebrity celeb) {
