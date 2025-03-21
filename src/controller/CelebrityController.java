@@ -28,35 +28,32 @@ public class CelebrityController {
     public CelebrityController(CelebrityGUI gui) {
         this.gui = gui;
 
-        // this is the default admin credentials, make sure to use it when testingggg
+        // Default admin credentials
         Map<String, String> adminDetails = new HashMap<>();
         adminDetails.put("password", "admin123");
         adminDetails.put("role", "admin");
         users.put("admin", adminDetails);
     }
 
-
     public void setGui(CelebrityGUI gui) {
         this.gui = gui;
     }
 
-    public void showSelectionPanel() {
-        gui.showSelectionPanel();
-    }
-
     public void showSignInPanel(boolean isAdmin) {
-        gui.updateFrame(gui.createSignInPanel(isAdmin));
+        gui.showSignInPanel(isAdmin);
     }
 
     public void showSignUpPanel() {
-        gui.updateFrame(gui.createSignUpPanel());
+        gui.showSignUpPanel();
     }
 
     public void handleSignIn(String username, String password, boolean isAdmin) {
+        System.out.println("Handling sign-in for username: " + username + ", isAdmin: " + isAdmin);
         if (!username.isEmpty() && !password.isEmpty()) {
             Map<String, String> userDetails = users.get(username);
             if (userDetails != null && userDetails.get("password").equals(password)) {
                 String role = userDetails.get("role");
+                System.out.println("User role: " + role);
                 if (isAdmin && !"admin".equals(role)) {
                     JOptionPane.showMessageDialog(gui.getFrame(), "This is for admins only!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!isAdmin && "admin".equals(role)) {
@@ -66,6 +63,7 @@ public class CelebrityController {
                     signedInUser = username;
                     signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     celebrities = getSampleCelebrities();
+                    System.out.println("Celebrities loaded: " + celebrities.size());
                     gui.showMainContent(role);
                     JOptionPane.showMessageDialog(gui.getFrame(), "Signed in at: " + signInTime);
                 }
@@ -78,6 +76,7 @@ public class CelebrityController {
     }
 
     public void handleSignUp(String username, String password) {
+        System.out.println("Handling sign-up for username: " + username);
         if (!username.isEmpty() && !password.isEmpty()) {
             if (users.containsKey(username)) {
                 JOptionPane.showMessageDialog(gui.getFrame(), "Username already taken!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -87,7 +86,7 @@ public class CelebrityController {
                 userDetails.put("role", "user");
                 users.put(username, userDetails);
                 JOptionPane.showMessageDialog(gui.getFrame(), "Sign-up done! Please sign in.");
-                showSelectionPanel();
+                gui.showLoginPanel();
             }
         } else {
             JOptionPane.showMessageDialog(gui.getFrame(), "Enter both username and password", "Error", JOptionPane.ERROR_MESSAGE);
@@ -95,6 +94,7 @@ public class CelebrityController {
     }
 
     public void signOut() {
+        System.out.println("Signing out user: " + signedInUser);
         int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to sign out?", "Confirm Sign Out", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             signOutTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -102,16 +102,24 @@ public class CelebrityController {
             isSignedIn = false;
             signedInUser = null;
             celebrities.clear();
-            showSelectionPanel();
+            gui.showLoginPanel();
         }
     }
 
     public void updateCelebrityList(JPanel panel) {
+        System.out.println("Updating celebrity list, count: " + celebrities.size());
         panel.removeAll();
-        for (Celebrity celeb : celebrities) {
-            JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb);
-            panel.add(celebPanel);
-            panel.add(Box.createRigidArea(new Dimension(0, 15)));
+        if (celebrities.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No celebrities available.");
+            emptyLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            emptyLabel.setHorizontalAlignment(JLabel.CENTER);
+            panel.add(emptyLabel);
+        } else {
+            for (Celebrity celeb : celebrities) {
+                JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb);
+                panel.add(celebPanel);
+                panel.add(Box.createRigidArea(new Dimension(0, 15)));
+            }
         }
         panel.revalidate();
         panel.repaint();
@@ -144,6 +152,7 @@ public class CelebrityController {
             } else {
                 celebrities.add(new Celebrity(name, profession, bio, "", List.of(imageUrl), null));
                 updateCelebrityList(gui.getCelebListPanel());
+                JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + name + "' added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         } else if (result == JOptionPane.OK_OPTION) {
             JOptionPane.showMessageDialog(gui.getFrame(), "Name can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -183,6 +192,7 @@ public class CelebrityController {
                         if (index != -1) {
                             celebrities.set(index, updatedCelebrity);
                             updateCelebrityList(gui.getCelebListPanel());
+                            JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + newName + "' updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         }
                     } else if (result == JOptionPane.OK_OPTION) {
                         JOptionPane.showMessageDialog(gui.getFrame(), "Name can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -205,51 +215,39 @@ public class CelebrityController {
                     if (confirm == JOptionPane.YES_OPTION) {
                         celebrities.remove(celebToDelete);
                         updateCelebrityList(gui.getCelebListPanel());
+                        JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + selectedName + "' deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
             }
         }
     }
 
-    public static JPanel addImage(Celebrity celeb){
-
-        //panel for the image
-        JPanel panel = new JPanel(new BorderLayout(10,10));
+    public static JPanel addImage(Celebrity celeb) {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEtchedBorder());
-        panel.setMaximumSize(new Dimension(650,120));
+        panel.setMaximumSize(new Dimension(650, 120));
 
-        //load and display the image
         JLabel imageLabel = new JLabel();
         imageLabel.setPreferredSize(new Dimension(100, 100));
 
-        //checks to see if images is empty or not
-        if (celeb.getImages() != null && !celeb.getImages().isEmpty()){
-
+        if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
             try {
-
-                //getting first index of the list
                 URL imageURL = new URL(celeb.getImages().get(0));
-                //reading URl
                 Image image = ImageIO.read(imageURL);
-                // scaled image
-                Image scaled = image.getScaledInstance(100, 100, image.SCALE_SMOOTH);
+                Image scaled = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaled));
-
-            } catch (IOException e){
-
+            } catch (IOException e) {
                 imageLabel.setText("Image N/A");
-                System.out.println("Failed to load image" + celeb.getName() + ": " + e.getMessage());
-
+                System.out.println("Failed to load image " + celeb.getName() + ": " + e.getMessage());
             }
-
         } else {
-            System.out.println("No Image");
+            imageLabel.setText("No Image");
         }
 
         panel.add(imageLabel, BorderLayout.EAST);
         return panel;
-
     }
+
     private List<Celebrity> getSampleCelebrities() {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";

@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.net.URL;
@@ -11,13 +12,24 @@ import javax.swing.JPanel;
 import model.Celebrity;
 
 public class CelebrityPanel {
+    private static final Color CARD_COLOR_1 = new Color(255, 245, 245); // Light pink
+    private static final Color CARD_COLOR_2 = new Color(245, 245, 255); // Light blue
+    private static final Color TEXT_COLOR = new Color(30, 30, 50); // Dark gray
+    private static int cardCounter = 0;
+
     public static JPanel createCelebrityPanel(Celebrity celeb) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEtchedBorder());
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
         panel.setMaximumSize(new Dimension(650, 120));
+        panel.setBackground(cardCounter % 2 == 0 ? CARD_COLOR_1 : CARD_COLOR_2);
+        cardCounter++;
 
         JLabel textLabel = new JLabel("<html><b>" + celeb.getName() + "</b><br>Profession: " + celeb.getProfession() + "<br>Bio: " + celeb.getBiography() + "</html>");
-        textLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        textLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        textLabel.setForeground(TEXT_COLOR);
         textLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel.add(textLabel, BorderLayout.CENTER);
 
@@ -35,7 +47,7 @@ public class CelebrityPanel {
             imageLabel = new JLabel("No Image");
         }
         imageLabel.setPreferredSize(new Dimension(100, 100));
-        panel.add(imageLabel, BorderLayout.EAST);
+        panel.add(imageLabel, BorderLayout.WEST); // Moved to left for better layout
 
         return panel;
     }
