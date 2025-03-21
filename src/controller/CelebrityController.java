@@ -19,6 +19,7 @@ import view.CelebrityPanel;
 public class CelebrityController {
     private CelebrityGUI gui;
     private List<Celebrity> celebrities = new ArrayList<>();
+    private List<Celebrity> favorites = new ArrayList<>(); // New field for favorites
     private Map<String, Map<String, String>> users = new HashMap<>();
     private boolean isSignedIn = false;
     private String signedInUser = null;
@@ -63,6 +64,7 @@ public class CelebrityController {
                     signedInUser = username;
                     signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     celebrities = getSampleCelebrities();
+                    favorites.clear(); // Reset favorites on new sign-in
                     System.out.println("Celebrities loaded: " + celebrities.size());
                     gui.showMainContent(role);
                     JOptionPane.showMessageDialog(gui.getFrame(), "Signed in at: " + signInTime);
@@ -99,6 +101,7 @@ public class CelebrityController {
         signedInUser = "Guest";
         signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         celebrities = getSampleCelebrities();
+        favorites.clear(); // Reset favorites for guest
         gui.showMainContent("guest");
         JOptionPane.showMessageDialog(gui.getFrame(), "Signed in as Guest at: " + signInTime);
     }
@@ -112,6 +115,7 @@ public class CelebrityController {
             isSignedIn = false;
             signedInUser = null;
             celebrities.clear();
+            favorites.clear(); // Clear favorites on sign-out
             gui.showLoginPanel();
         }
     }
@@ -127,6 +131,12 @@ public class CelebrityController {
         } else {
             for (Celebrity celeb : celebrities) {
                 JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
+                if (favorites.contains(celeb)) {
+                    celebPanel.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                    ));
+                }
                 panel.add(celebPanel);
                 panel.add(Box.createRigidArea(new Dimension(0, 15)));
             }
@@ -232,6 +242,7 @@ public class CelebrityController {
                     int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to delete " + selectedName + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         celebrities.remove(celebToDelete);
+                        favorites.remove(celebToDelete); // Remove from favorites if present
                         updateCelebrityList(gui.getCelebListPanel());
                         JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + selectedName + "' deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -312,6 +323,12 @@ public class CelebrityController {
         } else {
             for (Celebrity celeb : filteredCelebrities) {
                 JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
+                if (favorites.contains(celeb)) {
+                    celebPanel.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                    ));
+                }
                 panel.add(celebPanel);
                 panel.add(Box.createRigidArea(new Dimension(0, 15)));
             }
@@ -319,6 +336,57 @@ public class CelebrityController {
 
         panel.revalidate();
         panel.repaint();
+    }
+
+    // Add to favorites
+    public void addToFavorites(Celebrity celeb) {
+        if (!favorites.contains(celeb)) {
+            favorites.add(celeb);
+            JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " added to favorites!");
+        } else {
+            JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " is already in favorites!");
+        }
+        updateCelebrityList(gui.getCelebListPanel()); // Refresh display
+    }
+
+    // Remove from favorites
+    public void removeFromFavorites(Celebrity celeb) {
+        if (favorites.remove(celeb)) {
+            JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " removed from favorites!");
+        } else {
+            JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " was not in favorites!");
+        }
+        updateCelebrityList(gui.getCelebListPanel()); // Refresh display
+    }
+
+    // Show favorites list
+    public void showFavorites() {
+        System.out.println("Showing favorites list, count: " + favorites.size());
+        JPanel panel = gui.getCelebListPanel();
+        panel.removeAll();
+        if (favorites.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No favorites yet.");
+            emptyLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            emptyLabel.setHorizontalAlignment(JLabel.CENTER);
+            panel.add(emptyLabel);
+        } else {
+            for (Celebrity celeb : favorites) {
+                JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
+                celebPanel.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                ));
+                panel.add(celebPanel);
+                panel.add(Box.createRigidArea(new Dimension(0, 15)));
+            }
+        }
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    // Getter for favorites list (used by CelebrityPanel)
+    public List<Celebrity> getFavorites() {
+        return favorites;
     }
 
     public static JPanel addImage(Celebrity celeb) {

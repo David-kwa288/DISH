@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import model.Celebrity;
@@ -50,12 +51,31 @@ public class CelebrityPanel {
         imageLabel.setPreferredSize(new Dimension(100, 100));
         panel.add(imageLabel, BorderLayout.WEST);
 
+        // Add favorite button
+        JButton favButton = new JButton("★"); // Star symbol for favorite
+        favButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+        favButton.setForeground(controller.getFavorites().contains(celeb) ? Color.YELLOW : TEXT_COLOR);
+        favButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        favButton.setContentAreaFilled(false);
+        favButton.addActionListener(e -> {
+            if (controller.getFavorites().contains(celeb)) {
+                controller.removeFromFavorites(celeb);
+                favButton.setForeground(TEXT_COLOR);
+            } else {
+                controller.addToFavorites(celeb);
+                favButton.setForeground(Color.YELLOW);
+            }
+        });
+        panel.add(favButton, BorderLayout.EAST);
+
         // Make panel clickable
         panel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                controller.showCelebrityDetails(celeb);
+                if (e.getComponent() != favButton) { // Avoid triggering details when clicking the favorite button
+                    controller.showCelebrityDetails(celeb);
+                }
             }
         });
 

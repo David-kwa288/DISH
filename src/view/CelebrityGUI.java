@@ -105,6 +105,8 @@ public class CelebrityGUI {
                 if (searchField != null) searchField.requestFocus(); // Focus the search field
             }));
             buttonPanel.add(Box.createVerticalStrut(10));
+            buttonPanel.add(createSidebarButton("Favorites", e -> controller.showFavorites())); // Added Favorites button
+            buttonPanel.add(Box.createVerticalStrut(10));
             if ("admin".equals(role)) {
                 buttonPanel.add(createSidebarButton("Add Celebrity", e -> controller.insertCelebrity()));
                 buttonPanel.add(Box.createVerticalStrut(10));
