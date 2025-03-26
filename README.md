@@ -32,9 +32,9 @@ This project is a Java Swing-based GUI application for managing a celebrity cata
 - If you are prompted, set the JDK to`java-23-openjdk`).
 - Check `File > Project Structure > SDKs` to confirm the proper JDK is selected.
 
-4. **Run the Application**:
-- Locate `Main.java` in the `src` folder.
-- Right-click it and select `Run` to start the app.
+4. **main.java.Run the Application**:
+- Locate `main.java.Run.java` in the `src` folder.
+- Right-click it and select `main.java.Run` to start the app.
 
 ### Usage
 - **The Initial Screen**: Displays "Sign In (Users)", "Sign Up (Users)", and "Admin Sign In".

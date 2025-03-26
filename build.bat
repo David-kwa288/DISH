@@ -4,7 +4,7 @@ echo Building Celebrity Catalog Project...
 :: Set project directory variables
 set SRC_DIR=src
 set OUT_DIR=out\production\CelebrityCatalog
-set MAIN_CLASS=Main
+set MAIN_CLASS=main.java.Run
 
 :: Create output directory if it doesn’t exist
 if not exist %OUT_DIR% mkdir %OUT_DIR%
@@ -20,7 +20,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo Compilation successful!
 
-:: Run the program
+:: main.java.Run the program
 echo Running the program...
 java -cp %OUT_DIR% %MAIN_CLASS%
 

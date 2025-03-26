@@ -1,9 +1,10 @@
-package controller;
+package test.java.controller;
 
-import model.Celebrity;
+import main.java.controller.CelebrityController;
+import main.java.model.Celebrity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import view.CelebrityGUI;
+import main.java.view.CelebrityGUI;
 
 import javax.swing.*;
 import java.util.List;

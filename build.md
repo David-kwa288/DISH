@@ -15,9 +15,9 @@ This document provides instructions on how to run the build scripts (`build.sh` 
 1. Open Command Prompt:
     cd C:<repo>
 
-2. Run:
+2. main.java.Run:
     build.bat
 
 ### Running
 Using Scripts:
-    Run build.sh or build.bat—GUI starts automatically.
+    main.java.Run build.sh or build.bat—GUI starts automatically.

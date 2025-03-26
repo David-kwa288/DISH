@@ -20,7 +20,7 @@ fi
 
 echo "Compilation successful!"
 
-# Run the program
+# main.java.Run the program
 echo "Running the program..."
 java -cp "$OUT_DIR" $MAIN_CLASS
 
