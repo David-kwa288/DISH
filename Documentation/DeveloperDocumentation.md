@@ -61,11 +61,10 @@ The project follows a **Model-View-Controller (MVC)** architecture:
 - **Fields**: `name`, `profession`, `biography`, `achievements`, `images`, `videos`.
 - **Acts as**: Passive data container, accessed by the controller.
 
-### View (`CelebrityGUI.java`, `CelebrityPanel.java`, `Run.java`):
+### View (`CelebrityGUI.java`, `CelebrityPanel.java`):
 - **Location**: `src/main/java/view/`
 - **Role**: Implements the UI using Java Swing.
 - **Main Components**:
-  - `Run.java`: Entry point; initializes `CelebrityController` and `CelebrityGUI`.
   - `CelebrityGUI.java`: Manages the main window, sidebar, and content panels.
   - `CelebrityPanel.java`: Renders individual celebrity cards.
 
