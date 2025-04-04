@@ -1,9 +1,8 @@
 package controller;
 
-import main.java.controller.CelebrityController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import main.java.view.CelebrityGUI;
+import view.CelebrityGUI;
 
 import javax.swing.*;
 
@@ -12,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SystemTest {
     private CelebrityController controller;
 
+    // Dummy GUI to avoid real GUI interactions
     private static class DummyGUI extends CelebrityGUI {
         public DummyGUI(CelebrityController controller) {
             super(controller);
@@ -66,7 +66,11 @@ public class SystemTest {
     @Test
     public void testSecurityAndAccessControl() {
         controller.handleSignUp("normalUser", "userpass");
-        controller.handleSignIn("normalUser", "userpass", true); // Try admin access as user
+
+        // This call should fail or display a dialog, but not crash
+        controller.handleSignIn("normalUser", "userpass", true); // Incorrect role
+
+        // We can't assert access control here unless the method throws an exception or flag
         assertTrue(controller.getFavorites().isEmpty(), "Non-admin should not gain admin privileges.");
     }
 }
