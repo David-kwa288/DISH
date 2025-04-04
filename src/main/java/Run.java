@@ -1,9 +1,8 @@
-// This is the run file
 package main.java;
 
 import javax.swing.SwingUtilities;
-import main.java.view.CelebrityGUI;
-import main.java.controller.CelebrityController;
+import view.CelebrityGUI;
+import controller.CelebrityController; 
 
 public class Run {
     public static void main(String[] args) {

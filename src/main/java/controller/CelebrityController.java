@@ -1,5 +1,4 @@
-package main.java.controller;
-
+package controller;
 
 import java.awt.*;
 import java.io.IOException;
@@ -10,17 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
-import main.java.model.Celebrity;
-import main.java.view.CelebrityGUI;
-import main.java.view.CelebrityPanel;
+import model.Celebrity;
+import view.CelebrityGUI;
+import view.CelebrityPanel;
 
 public class CelebrityController {
     private CelebrityGUI gui;
     private List<Celebrity> celebrities = new ArrayList<>();
-    private List<Celebrity> favorites = new ArrayList<>(); // New field for favorites
+    private List<Celebrity> favorites = new ArrayList<>();
     private Map<String, Map<String, String>> users = new HashMap<>();
     private boolean isSignedIn = false;
     private String signedInUser = null;
@@ -50,12 +51,10 @@ public class CelebrityController {
     }
 
     public void handleSignIn(String username, String password, boolean isAdmin) {
-        System.out.println("Handling sign-in for username: " + username + ", isAdmin: " + isAdmin);
         if (!username.isEmpty() && !password.isEmpty()) {
             Map<String, String> userDetails = users.get(username);
             if (userDetails != null && userDetails.get("password").equals(password)) {
                 String role = userDetails.get("role");
-                System.out.println("User role: " + role);
                 if (isAdmin && !"admin".equals(role)) {
                     JOptionPane.showMessageDialog(gui.getFrame(), "This is for admins only!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!isAdmin && "admin".equals(role)) {
@@ -65,8 +64,7 @@ public class CelebrityController {
                     signedInUser = username;
                     signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     celebrities = getSampleCelebrities();
-                    favorites.clear(); // Reset favorites on new sign-in
-                    System.out.println("Celebrities loaded: " + celebrities.size());
+                    favorites.clear();
                     gui.showMainContent(role);
                     JOptionPane.showMessageDialog(gui.getFrame(), "Signed in at: " + signInTime);
                 }
@@ -79,7 +77,6 @@ public class CelebrityController {
     }
 
     public void handleSignUp(String username, String password) {
-        System.out.println("Handling sign-up for username: " + username);
         if (!username.isEmpty() && !password.isEmpty()) {
             if (users.containsKey(username)) {
                 JOptionPane.showMessageDialog(gui.getFrame(), "Username already taken!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -97,18 +94,16 @@ public class CelebrityController {
     }
 
     public void handleGuestSignIn() {
-        System.out.println("Handling guest sign-in");
         isSignedIn = true;
         signedInUser = "Guest";
         signInTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         celebrities = getSampleCelebrities();
-        favorites.clear(); // Reset favorites for guest
+        favorites.clear();
         gui.showMainContent("guest");
         JOptionPane.showMessageDialog(gui.getFrame(), "Signed in as Guest at: " + signInTime);
     }
 
     public void signOut() {
-        System.out.println("Signing out user: " + signedInUser);
         int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to sign out?", "Confirm Sign Out", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             signOutTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -116,13 +111,12 @@ public class CelebrityController {
             isSignedIn = false;
             signedInUser = null;
             celebrities.clear();
-            favorites.clear(); // Clear favorites on sign-out
+            favorites.clear();
             gui.showLoginPanel();
         }
     }
 
     public void updateCelebrityList(JPanel panel) {
-        System.out.println("Updating celebrity list, count: " + celebrities.size());
         panel.removeAll();
         if (celebrities.isEmpty()) {
             JLabel emptyLabel = new JLabel("No celebrities available.");
@@ -134,7 +128,7 @@ public class CelebrityController {
                 JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
                 if (favorites.contains(celeb)) {
                     celebPanel.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2),
                             BorderFactory.createEmptyBorder(10, 10, 10, 10)
                     ));
                 }
@@ -150,8 +144,8 @@ public class CelebrityController {
         JTextField nameField = new JTextField(20);
         JTextField professionField = new JTextField(20);
         JTextField bioField = new JTextField(20);
+        JTextField awardsField = new JTextField(20);
         JTextField imageUrlField = new JTextField(20);
-        JTextField awardsField = new JTextField(20); // Added awards field
         JPanel inputPanel = new JPanel(new GridLayout(5, 2));
         inputPanel.add(new JLabel("Name:"));
         inputPanel.add(nameField);
@@ -185,121 +179,203 @@ public class CelebrityController {
     }
 
     public void updateCelebrity() {
-        String[] names = celebrities.stream().map(Celebrity::getName).toArray(String[]::new);
-        if (names.length == 0) {
-            JOptionPane.showMessageDialog(gui.getFrame(), "No celebrities to update!");
-        } else {
-            String selectedName = (String) JOptionPane.showInputDialog(gui.getFrame(), "Select Celebrity to Update:", "Update Celebrity", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
-            if (selectedName != null) {
-                Celebrity celebToUpdate = celebrities.stream().filter(c -> c.getName().equals(selectedName)).findFirst().orElse(null);
-                if (celebToUpdate != null) {
-                    JTextField nameField = new JTextField(celebToUpdate.getName(), 20);
-                    JTextField professionField = new JTextField(celebToUpdate.getProfession(), 20);
-                    JTextField bioField = new JTextField(celebToUpdate.getBiography(), 20);
-                    JTextField awardsField = new JTextField(celebToUpdate.getAchievements(), 20); // Added awards
-                    JTextField imageUrlField = new JTextField(celebToUpdate.getImages() != null && !celebToUpdate.getImages().isEmpty() ? celebToUpdate.getImages().get(0) : "", 20);
-                    JPanel inputPanel = new JPanel(new GridLayout(5, 2));
-                    inputPanel.add(new JLabel("Name:"));
-                    inputPanel.add(nameField);
-                    inputPanel.add(new JLabel("Profession:"));
-                    inputPanel.add(professionField);
-                    inputPanel.add(new JLabel("Biography:"));
-                    inputPanel.add(bioField);
-                    inputPanel.add(new JLabel("Awards:"));
-                    inputPanel.add(awardsField);
-                    inputPanel.add(new JLabel("Image URL or Path:"));
-                    inputPanel.add(imageUrlField);
-                    int result = JOptionPane.showConfirmDialog(gui.getFrame(), inputPanel, "Update Celebrity", JOptionPane.OK_CANCEL_OPTION);
-                    if (result == JOptionPane.OK_OPTION && !nameField.getText().trim().isEmpty()) {
-                        String newName = nameField.getText().trim();
-                        String newProfession = professionField.getText().trim();
-                        String newBio = bioField.getText().trim();
-                        String newAwards = awardsField.getText().trim();
-                        String newImageUrl = imageUrlField.getText().trim().isEmpty() ? "https://via.placeholder.com/100" : imageUrlField.getText().trim();
-                        Celebrity updatedCelebrity = new Celebrity(newName, newProfession, newBio, newAwards, List.of(newImageUrl), null);
-                        int index = celebrities.indexOf(celebToUpdate);
-                        if (index != -1) {
-                            celebrities.set(index, updatedCelebrity);
-                            updateCelebrityList(gui.getCelebListPanel());
-                            JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + newName + "' updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        }
-                    } else if (result == JOptionPane.OK_OPTION) {
-                        JOptionPane.showMessageDialog(gui.getFrame(), "Name can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+        JTextField searchField = new JTextField(20);
+        JPanel searchPanel = new JPanel(new GridLayout(1, 2));
+        searchPanel.add(new JLabel("Search Celebrity Name:"));
+        searchPanel.add(searchField);
+        int result = JOptionPane.showConfirmDialog(gui.getFrame(), searchPanel, "Search Celebrity to Update", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION && !searchField.getText().trim().isEmpty()) {
+            String searchName = searchField.getText().trim().toLowerCase();
+            List<Celebrity> matches = celebrities.stream()
+                    .filter(c -> c.getName().toLowerCase().contains(searchName))
+                    .collect(Collectors.toList());
+            if (matches.isEmpty()) {
+                JOptionPane.showMessageDialog(gui.getFrame(), "No celebrities found matching '" + searchName + "'!", "Not Found", JOptionPane.WARNING_MESSAGE);
+            } else if (matches.size() > 1) {
+                JOptionPane.showMessageDialog(gui.getFrame(), "Multiple matches found. Please be more specific!", "Multiple Matches", JOptionPane.WARNING_MESSAGE);
+            } else {
+                updateCelebrity(matches.get(0));
+            }
+        } else if (result == JOptionPane.OK_OPTION) {
+            JOptionPane.showMessageDialog(gui.getFrame(), "Search field can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void updateCelebrity(Celebrity celebToUpdate) {
+        if (celebToUpdate != null) {
+            JTextField nameField = new JTextField(celebToUpdate.getName(), 20);
+            JTextField professionField = new JTextField(celebToUpdate.getProfession(), 20);
+            JTextField bioField = new JTextField(celebToUpdate.getBiography(), 20);
+            JTextField awardsField = new JTextField(celebToUpdate.getAchievements(), 20);
+            JTextField imageUrlField = new JTextField(celebToUpdate.getImages() != null && !celebToUpdate.getImages().isEmpty() ? celebToUpdate.getImages().get(0) : "", 20);
+            JPanel inputPanel = new JPanel(new GridLayout(5, 2));
+            inputPanel.add(new JLabel("Name:"));
+            inputPanel.add(nameField);
+            inputPanel.add(new JLabel("Profession:"));
+            inputPanel.add(professionField);
+            inputPanel.add(new JLabel("Biography:"));
+            inputPanel.add(bioField);
+            inputPanel.add(new JLabel("Awards:"));
+            inputPanel.add(awardsField);
+            inputPanel.add(new JLabel("Image URL or Path:"));
+            inputPanel.add(imageUrlField);
+            int result = JOptionPane.showConfirmDialog(gui.getFrame(), inputPanel, "Update Celebrity", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION && !nameField.getText().trim().isEmpty()) {
+                String newName = nameField.getText().trim();
+                String newProfession = professionField.getText().trim();
+                String newBio = bioField.getText().trim();
+                String newAwards = awardsField.getText().trim();
+                String newImageUrl = imageUrlField.getText().trim().isEmpty() ? "https://via.placeholder.com/100" : imageUrlField.getText().trim();
+                Celebrity updatedCelebrity = new Celebrity(newName, newProfession, newBio, newAwards, List.of(newImageUrl), null);
+                int index = celebrities.indexOf(celebToUpdate);
+                if (index != -1) {
+                    celebrities.set(index, updatedCelebrity);
+                    updateCelebrityList(gui.getCelebListPanel());
+                    JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + newName + "' updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 }
+            } else if (result == JOptionPane.OK_OPTION) {
+                JOptionPane.showMessageDialog(gui.getFrame(), "Name can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     public void deleteCelebrity() {
-        String[] names = celebrities.stream().map(Celebrity::getName).toArray(String[]::new);
-        if (names.length == 0) {
-            JOptionPane.showMessageDialog(gui.getFrame(), "No celebrities to delete!");
-        } else {
-            String selectedName = (String) JOptionPane.showInputDialog(gui.getFrame(), "Select Celebrity to Delete:", "Delete Celebrity", JOptionPane.QUESTION_MESSAGE, null, names, names[0]);
-            if (selectedName != null) {
-                Celebrity celebToDelete = celebrities.stream().filter(c -> c.getName().equals(selectedName)).findFirst().orElse(null);
-                if (celebToDelete != null) {
-                    int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to delete " + selectedName + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        celebrities.remove(celebToDelete);
-                        favorites.remove(celebToDelete); // Remove from favorites if present
-                        updateCelebrityList(gui.getCelebListPanel());
-                        JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + selectedName + "' deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                }
+        JTextField searchField = new JTextField(20);
+        JPanel searchPanel = new JPanel(new GridLayout(1, 2));
+        searchPanel.add(new JLabel("Search Celebrity Name:"));
+        searchPanel.add(searchField);
+        int result = JOptionPane.showConfirmDialog(gui.getFrame(), searchPanel, "Search Celebrity to Delete", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION && !searchField.getText().trim().isEmpty()) {
+            String searchName = searchField.getText().trim().toLowerCase();
+            List<Celebrity> matches = celebrities.stream()
+                    .filter(c -> c.getName().toLowerCase().contains(searchName))
+                    .collect(Collectors.toList());
+            if (matches.isEmpty()) {
+                JOptionPane.showMessageDialog(gui.getFrame(), "No celebrities found matching '" + searchName + "'!", "Not Found", JOptionPane.WARNING_MESSAGE);
+            } else if (matches.size() > 1) {
+                JOptionPane.showMessageDialog(gui.getFrame(), "Multiple matches found. Please be more specific!", "Multiple Matches", JOptionPane.WARNING_MESSAGE);
+            } else {
+                deleteCelebrity(matches.get(0));
+            }
+        } else if (result == JOptionPane.OK_OPTION) {
+            JOptionPane.showMessageDialog(gui.getFrame(), "Search field can’t be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void deleteCelebrity(Celebrity celebToDelete) {
+        if (celebToDelete != null) {
+            int confirm = JOptionPane.showConfirmDialog(gui.getFrame(), "Sure you want to delete " + celebToDelete.getName() + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                celebrities.remove(celebToDelete);
+                favorites.remove(celebToDelete);
+                updateCelebrityList(gui.getCelebListPanel());
+                JOptionPane.showMessageDialog(gui.getFrame(), "Celebrity '" + celebToDelete.getName() + "' deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
 
     public void showCelebrityDetails(Celebrity celeb) {
-        JDialog detailDialog = new JDialog(gui.getFrame(), celeb.getName() + " - Details", true);
-        detailDialog.setLayout(new BorderLayout(10, 10));
-        detailDialog.setSize(400, 300);
+        // Create the dialog
+        JDialog detailDialog = new JDialog(gui.getFrame(), celeb.getName(), true);
+        detailDialog.setLayout(new BorderLayout());
+        detailDialog.setSize(500, 350);
         detailDialog.setLocationRelativeTo(gui.getFrame());
 
-        JPanel detailPanel = new JPanel(new GridBagLayout());
-        detailPanel.setBackground(new Color(240, 245, 255));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // Main content panel with a gradient background
+        JPanel contentPanel = new JPanel(new BorderLayout(15, 15)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(245, 245, 255), 0, getHeight(), new Color(220, 230, 255));
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        JLabel nameLabel = new JLabel("Name: " + celeb.getName());
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        detailPanel.add(nameLabel, gbc);
-
-        gbc.gridy = 1;
-        JLabel professionLabel = new JLabel("Profession: " + celeb.getProfession());
-        detailPanel.add(professionLabel, gbc);
-
-        gbc.gridy = 2;
-        JLabel bioLabel = new JLabel("<html>Bio: " + celeb.getBiography() + "</html>");
-        bioLabel.setVerticalAlignment(JLabel.TOP);
-        detailPanel.add(bioLabel, gbc);
-
-        gbc.gridy = 3;
-        JLabel achievementsLabel = new JLabel("Awards: " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()));
-        detailPanel.add(achievementsLabel, gbc);
-
+        // Image panel (left side)
+        JPanel imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setOpaque(false);
+        JLabel imageLabel = new JLabel();
         if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
             try {
                 ImageIcon icon = new ImageIcon(new URL(celeb.getImages().get(0)));
-                java.awt.Image scaledImage = icon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
-                JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
-                detailDialog.add(imageLabel, BorderLayout.WEST);
+                java.awt.Image scaledImage = icon.getImage().getScaledInstance(120, 120, java.awt.Image.SCALE_SMOOTH);
+                imageLabel = new JLabel(new ImageIcon(scaledImage));
+                imageLabel.setHorizontalAlignment(JLabel.CENTER);
+                // Add a circular border and shadow effect
+                imageLabel.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(70, 130, 255), 2, true),
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
             } catch (Exception e) {
+                imageLabel.setText("Image N/A");
+                imageLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                imageLabel.setForeground(new Color(150, 150, 150));
                 System.err.println("Failed to load image for " + celeb.getName() + ": " + e.getMessage());
             }
+        } else {
+            imageLabel.setText("No Image");
+            imageLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            imageLabel.setForeground(new Color(150, 150, 150));
         }
+        imagePanel.add(imageLabel, BorderLayout.CENTER);
+        contentPanel.add(imagePanel, BorderLayout.WEST);
 
-        detailDialog.add(detailPanel, BorderLayout.CENTER);
+        // Details panel (right side)
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setOpaque(false);
+
+        // Name
+        JLabel nameLabel = new JLabel(celeb.getName());
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        nameLabel.setForeground(new Color(30, 30, 50));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailsPanel.add(nameLabel);
+
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        // Profession
+        JLabel professionLabel = new JLabel("Profession: " + celeb.getProfession());
+        professionLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
+        professionLabel.setForeground(new Color(70, 130, 255));
+        professionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailsPanel.add(professionLabel);
+
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        // Bio
+        JLabel bioLabel = new JLabel("<html><b>Bio:</b> " + celeb.getBiography() + "</html>");
+        bioLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        bioLabel.setForeground(new Color(50, 50, 50));
+        bioLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailsPanel.add(bioLabel);
+
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        // Awards
+        JLabel achievementsLabel = new JLabel("<html><b>Awards:</b> " + (celeb.getAchievements().isEmpty() ? "N/A" : celeb.getAchievements()) + "</html>");
+        achievementsLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        achievementsLabel.setForeground(new Color(50, 50, 50));
+        achievementsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailsPanel.add(achievementsLabel);
+
+        contentPanel.add(detailsPanel, BorderLayout.CENTER);
+
+        // Add a subtle shadow effect to the entire dialog
+        detailDialog.getRootPane().setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        detailDialog.add(contentPanel, BorderLayout.CENTER);
         detailDialog.setVisible(true);
     }
 
     public void filterCelebrities(String nameSearch, String profession, String award) {
-        System.out.println("Filtering celebrities - Name: " + nameSearch + ", Profession: " + profession + ", Award: " + award);
         JPanel panel = gui.getCelebListPanel();
         panel.removeAll();
 
@@ -326,7 +402,7 @@ public class CelebrityController {
                 JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
                 if (favorites.contains(celeb)) {
                     celebPanel.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                            BorderFactory.createLineBorder(new Color(255, 215, 0), 2),
                             BorderFactory.createEmptyBorder(10, 10, 10, 10)
                     ));
                 }
@@ -339,30 +415,32 @@ public class CelebrityController {
         panel.repaint();
     }
 
-    // Add to favorites
     public void addToFavorites(Celebrity celeb) {
+        if ("Guest".equals(signedInUser)) {
+            return; // No action or message for guests
+        }
         if (!favorites.contains(celeb)) {
             favorites.add(celeb);
             JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " added to favorites!");
+            updateCelebrityList(gui.getCelebListPanel());
         } else {
             JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " is already in favorites!");
         }
-        updateCelebrityList(gui.getCelebListPanel()); // Refresh display
     }
 
-    // Remove from favorites
     public void removeFromFavorites(Celebrity celeb) {
+        if ("Guest".equals(signedInUser)) {
+            return; // No action or message for guests
+        }
         if (favorites.remove(celeb)) {
             JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " removed from favorites!");
+            updateCelebrityList(gui.getCelebListPanel());
         } else {
             JOptionPane.showMessageDialog(gui.getFrame(), celeb.getName() + " was not in favorites!");
         }
-        updateCelebrityList(gui.getCelebListPanel()); // Refresh display
     }
 
-    // Show favorites list
     public void showFavorites() {
-        System.out.println("Showing favorites list, count: " + favorites.size());
         JPanel panel = gui.getCelebListPanel();
         panel.removeAll();
         if (favorites.isEmpty()) {
@@ -374,7 +452,7 @@ public class CelebrityController {
             for (Celebrity celeb : favorites) {
                 JPanel celebPanel = CelebrityPanel.createCelebrityPanel(celeb, this);
                 celebPanel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(255, 215, 0), 2), // Gold border for favorites
+                        BorderFactory.createLineBorder(new Color(255, 215, 0), 2),
                         BorderFactory.createEmptyBorder(10, 10, 10, 10)
                 ));
                 panel.add(celebPanel);
@@ -385,9 +463,16 @@ public class CelebrityController {
         panel.repaint();
     }
 
-    // Getter for favorites list (used by CelebrityPanel)
     public List<Celebrity> getFavorites() {
         return favorites;
+    }
+
+    public String getSignedInUser() {
+        return signedInUser;
+    }
+
+    public String getRole() {
+        return users.get(signedInUser) != null ? users.get(signedInUser).get("role") : null;
     }
 
     public static JPanel addImage(Celebrity celeb) {
@@ -396,13 +481,13 @@ public class CelebrityController {
         panel.setMaximumSize(new Dimension(650, 120));
 
         JLabel imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(100, 100));
+        imageLabel.setPreferredSize(new Dimension(80, 80));
 
         if (celeb.getImages() != null && !celeb.getImages().isEmpty()) {
             try {
                 URL imageURL = new URL(celeb.getImages().get(0));
                 Image image = ImageIO.read(imageURL);
-                Image scaled = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                Image scaled = image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaled));
             } catch (IOException e) {
                 imageLabel.setText("Image N/A");
@@ -416,42 +501,19 @@ public class CelebrityController {
         return panel;
     }
 
-    List<Celebrity> getSampleCelebrities() {
+    private List<Celebrity> getSampleCelebrities() {
         List<Celebrity> list = new ArrayList<>();
         String placeholderImage = "https://via.placeholder.com/100";
-
-        // 30 random celebrities with varied professions and awards
-        list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star", List.of(placeholderImage), null));
-        list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "Billboard Queen", List.of(placeholderImage), null));
-        list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "Box Office King", List.of(placeholderImage), null));
-        list.add(new Celebrity("Angelina Jolie", "Actress", "Known for Tomb Raider and Maleficent", "Humanitarian", List.of(placeholderImage), null));
-        list.add(new Celebrity("Brad Pitt", "Actor", "Star of Fight Club and Once Upon a Time in Hollywood", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Rihanna", "Singer", "Hitmaker and Fenty Beauty founder", "Fashion Icon", List.of(placeholderImage), null));
-        list.add(new Celebrity("Tom Hanks", "Actor", "Forrest Gump and Cast Away legend", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Lady Gaga", "Singer", "Known for her bold style and vocals", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Will Smith", "Actor", "Fresh Prince and Men in Black star", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Adele", "Singer", "Soulful voice behind Hello", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Johnny Depp", "Actor", "Pirates of the Caribbean icon", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Emma Watson", "Actress", "Hermione in Harry Potter", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Kanye West", "Rapper", "Influential artist and producer", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Scarlett Johansson", "Actress", "Black Widow in the MCU", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Justin Bieber", "Singer", "Pop sensation from Baby to Justice", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Natalie Portman", "Actress", "Star of Black Swan", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Drake", "Rapper", "Hitmaker with Take Care and Scorpion", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Sandra Bullock", "Actress", "Known for Speed and The Blind Side", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Robert Downey Jr.", "Actor", "Iron Man in the MCU", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Ariana Grande", "Singer", "Pop star with a powerful voice", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Hugh Jackman", "Actor", "Wolverine in X-Men", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Selena Gomez", "Singer", "Disney star turned pop artist", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Matt Damon", "Actor", "Star of Bourne series", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Katy Perry", "Singer", "Known for Teenage Dream", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Chris Evans", "Actor", "Captain America in the MCU", "", List.of(placeholderImage), null));
-        list.add(new Celebrity("Meryl Streep", "Actress", "Legendary performer with many awards", "Oscar Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Ed Sheeran", "Singer", "Acoustic star with Divide", "Grammy Winner", List.of(placeholderImage), null));
-        list.add(new Celebrity("Zendaya", "Actress", "Star of Euphoria and Spider-Man", "", List.of(placeholderImage), null));
-
+        list.add(new Celebrity("Leonardo DiCaprio", "Actor", "Star of Titanic and The Revenant", "Oscar Winner", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9R7hEKTEHZPf9cCG314IjrPjftcwCUrAHdA&s"), null));
+        list.add(new Celebrity("Beyoncé", "Singer", "Global icon with multiple Grammys", "Grammy Winner", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvmoCfN884frsjshSRnaXTEVgK3tEq9jhE9Q&s"), null));
+        list.add(new Celebrity("Chris Hemsworth", "Actor", "Thor in the Marvel Universe", "Action Star", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9ALJAyGJC7tuswE_-04bz0Ej0aemfK1qAKw&s"), null));
+        list.add(new Celebrity("Taylor Swift", "Singer-Songwriter", "Pop star with record-breaking albums", "Billboard Queen", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw5tE7TlJnLliRelqV_nNc_cQQb7uAJAG2KA&s"), null));
+        list.add(new Celebrity("Dwayne Johnson", "Actor/Wrestler", "The Rock, action movie icon", "Box Office King", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROksKDZqYYqYz-IrYLm9BTrgRYf8VaqkjZjw&s"), null));
+        list.add(new Celebrity("Angelina Jolie", "Actress", "Known for Tomb Raider and Maleficent", "Humanitarian", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_DCG9zZmNmegdUxekU-zp3Xi29ditcGDFrg&s"), null));
+        list.add(new Celebrity("Brad Pitt", "Actor", "Star of Fight Club and Once Upon a Time in Hollywood", "Oscar Winner", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST3SEKmrY7tJkYf56NUrhl-ccX5FfbBS6tbw&s"), null));
+        list.add(new Celebrity("Rihanna", "Singer", "Hitmaker and Fenty Beauty founder", "Fashion Icon", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVU2hF7RaELxZSEVaBwXIuMEg41pHLCAXARQ&s"), null));
+        list.add(new Celebrity("Tom Hanks", "Actor", "Forrest Gump and Cast Away legend", "Oscar Winner", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhQVbTdh9qRXs3AIynt1tCl-rKWceK83HYaQ&s"), null));
+        list.add(new Celebrity("Lady Gaga", "Singer", "Known for her bold style and vocals", "Oscar Winner", List.of("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgOKYouIRz5drnvAmTJYgqvFr36XiCUxMhtg&s"), null));
         return list;
     }
 }

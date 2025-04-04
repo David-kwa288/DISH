@@ -1,4 +1,4 @@
-package main.java.view;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,7 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import main.java.controller.CelebrityController;
+import javax.swing.border.Border;
+import controller.CelebrityController;
 
 public class CelebrityGUI {
     private JFrame frame;
@@ -31,16 +32,15 @@ public class CelebrityGUI {
     private JPanel mainPanel;
     private JPanel sidebarPanel;
     private CelebrityController controller;
-    private JTextField searchField; // For name-based search
-    private JComboBox<String> professionFilter; // Filter by profession
-    private JComboBox<String> awardsFilter; // Filter by awards
+    private JTextField searchField;
+    private JComboBox<String> professionFilter;
+    private JComboBox<String> awardsFilter;
 
-    // UI Constants
-    private static final Color PRIMARY_COLOR = new Color(70, 130, 255); // Vibrant blue
-    private static final Color SECONDARY_COLOR = new Color(255, 90, 120); // Coral pink
-    private static final Color BACKGROUND_COLOR = new Color(240, 245, 255); // Light blue-gray
-    private static final Color ACCENT_COLOR = new Color(255, 255, 255); // White
-    private static final Color TEXT_COLOR = new Color(30, 30, 50); // Dark gray
+    private static final Color PRIMARY_COLOR = new Color(70, 130, 255);
+    private static final Color SECONDARY_COLOR = new Color(255, 90, 120);
+    private static final Color BACKGROUND_COLOR = new Color(240, 245, 255);
+    private static final Color ACCENT_COLOR = new Color(255, 255, 255);
+    private static final Color TEXT_COLOR = new Color(30, 30, 50);
     private static final Font TITLE_FONT = new Font("SansSerif", Font.BOLD, 22);
     private static final Font BUTTON_FONT = new Font("SansSerif", Font.BOLD, 16);
     private static final Font LABEL_FONT = new Font("SansSerif", Font.PLAIN, 14);
@@ -87,7 +87,6 @@ public class CelebrityGUI {
     }
 
     public void updateSidebarButtons(String role) {
-        System.out.println("Updating sidebar buttons for role: " + role);
         sidebarPanel.removeAll();
 
         JLabel appTitle = new JLabel("Celeb Catalog");
@@ -101,11 +100,13 @@ public class CelebrityGUI {
 
         if (role != null) {
             buttonPanel.add(createSidebarButton("Search Celebrity", e -> {
-                if (searchField != null) searchField.requestFocus(); // Focus the search field
+                if (searchField != null) searchField.requestFocus();
             }));
             buttonPanel.add(Box.createVerticalStrut(10));
-            buttonPanel.add(createSidebarButton("Favorites", e -> controller.showFavorites())); // Added Favorites button
-            buttonPanel.add(Box.createVerticalStrut(10));
+            if (!"guest".equals(role)) {
+                buttonPanel.add(createSidebarButton("Favorites", e -> controller.showFavorites()));
+                buttonPanel.add(Box.createVerticalStrut(10));
+            }
             if ("admin".equals(role)) {
                 buttonPanel.add(createSidebarButton("Add Celebrity", e -> controller.insertCelebrity()));
                 buttonPanel.add(Box.createVerticalStrut(10));
@@ -158,21 +159,18 @@ public class CelebrityGUI {
     }
 
     public void showLoginPanel() {
-        System.out.println("Showing login panel");
         updateSidebarButtons(null);
         JPanel loginPanel = createAuthPanel(false, false);
         updateMainContent(loginPanel);
     }
 
     public void showSignInPanel(boolean isAdmin) {
-        System.out.println("Showing sign-in panel, isAdmin: " + isAdmin);
         updateSidebarButtons(null);
         JPanel signInPanel = createAuthPanel(isAdmin, false);
         updateMainContent(signInPanel);
     }
 
     public void showSignUpPanel() {
-        System.out.println("Showing sign-up panel");
         updateSidebarButtons(null);
         JPanel signUpPanel = createAuthPanel(false, true);
         updateMainContent(signUpPanel);
@@ -254,12 +252,10 @@ public class CelebrityGUI {
     }
 
     public void showMainContent(String role) {
-        System.out.println("Showing main content for role: " + role);
         updateSidebarButtons(role);
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
 
-        // Header and Search/Filter Panel
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
         searchPanel.setBackground(BACKGROUND_COLOR);
         searchPanel.setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
@@ -276,10 +272,19 @@ public class CelebrityGUI {
         gbc.insets = new Insets(0, 5, 0, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Name Search
-        searchField = new JTextField(20);
+        searchField = new JTextField(20) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.GRAY);
+                g.drawString("🔍", 5, getHeight() / 2 + 5); // Magnifying glass emoji as fallback
+            }
+        };
         searchField.setToolTipText("Search by name");
-        searchField.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(SECONDARY_COLOR, 1),
+                BorderFactory.createEmptyBorder(0, 25, 0, 0)
+        ));
         searchField.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
@@ -291,7 +296,6 @@ public class CelebrityGUI {
         gbc.weightx = 1.0;
         searchAndFilterPanel.add(searchField, gbc);
 
-        // Profession Filter
         String[] professions = {"All", "Actor", "Actress", "Singer", "Rapper", "Singer-Songwriter", "Actor/Wrestler", "Athlete"};
         professionFilter = new JComboBox<>(professions);
         professionFilter.setToolTipText("Filter by profession");
@@ -302,7 +306,6 @@ public class CelebrityGUI {
         gbc.weightx = 0.0;
         searchAndFilterPanel.add(professionFilter, gbc);
 
-        // Awards Filter
         String[] awards = {"All", "Oscar Winner", "Grammy Winner", "Billboard Queen", "Box Office King", "None"};
         awardsFilter = new JComboBox<>(awards);
         awardsFilter.setToolTipText("Filter by awards");
@@ -312,7 +315,6 @@ public class CelebrityGUI {
         gbc.gridy = 0;
         searchAndFilterPanel.add(awardsFilter, gbc);
 
-        // Home Button
         JButton homeButton = new JButton("\uD83C\uDFE0") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -344,7 +346,6 @@ public class CelebrityGUI {
         searchPanel.add(searchAndFilterPanel, BorderLayout.CENTER);
         mainPanel.add(searchPanel, BorderLayout.NORTH);
 
-        // Celebrity List
         celebListPanel = new JPanel();
         celebListPanel.setLayout(new BoxLayout(celebListPanel, BoxLayout.Y_AXIS));
         celebListPanel.setBackground(BACKGROUND_COLOR);
@@ -353,7 +354,7 @@ public class CelebrityGUI {
         JScrollPane scrollPane = new JScrollPane(celebListPanel);
         scrollPane.setBorder(null);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(20); // Faster scrolling
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         updateMainContent(mainPanel);
@@ -367,14 +368,12 @@ public class CelebrityGUI {
     }
 
     public void updateMainContent(JPanel panel) {
-        System.out.println("Updating main content with new panel");
         frame.getContentPane().removeAll();
         frame.getContentPane().add(sidebarPanel, BorderLayout.WEST);
         mainPanel = panel;
         frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
         frame.revalidate();
         frame.repaint();
-        System.out.println("Main content updated");
     }
 
     public JFrame getFrame() {
